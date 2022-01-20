@@ -40,6 +40,7 @@ import {
   kPageLayout,
   kPageLayoutArticle,
   kPageLayoutCustom,
+  kPageLayoutListing,
   kPageLayoutNone,
 } from "./format-html-shared.ts";
 
@@ -95,7 +96,8 @@ export function formatHasPageLayout(format: Format) {
 
 export function formatHasArticlePageLayout(format: Format) {
   return format.metadata[kPageLayout] === undefined ||
-    format.metadata[kPageLayout] === kPageLayoutArticle;
+    format.metadata[kPageLayout] === kPageLayoutArticle ||
+    format.metadata[kPageLayout] === kPageLayoutListing;
 }
 
 export function formatHasCustomPageLayout(format: Format) {
@@ -382,13 +384,19 @@ function bootstrapHtmlPostprocessor(flags: PandocFlags, format: Format) {
     }
 
     // Note whether we need a narrow or wide margin layout
-    if (columnLayouts.length > 0) {
-      doc.body.classList.add("slimcontent");
+    if (format.metadata[kPageLayout] === kPageLayoutListing) {
+      doc.body.classList.add("listing");
+    }
+
+    const leftSidebar = doc.getElementById("quarto-sidebar");
+    const rightSidebar = doc.getElementById("quarto-margin-sidebar");
+    if (columnLayouts.length > 0 && leftSidebar) {
       // wide margin b/c there are margin elements
-    } else if (doc.getElementById("quarto-margin-sidebar")) {
+      doc.body.classList.add("slimcontent");
+    } else if (rightSidebar) {
       // there is a toc, default layout
     } else {
-      // no toc, narrow
+      // no toc, narrow body to preserve readability
       doc.body.classList.add("fullcontent");
     }
 
