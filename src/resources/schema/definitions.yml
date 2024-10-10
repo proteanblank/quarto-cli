@@ -2697,32 +2697,55 @@
         description: >
           The base font settings for the brand. These are used as the default for
           all text.
-        ref: brand-typography-options
+        ref: brand-typography-options-base
       headings:
         description: >
           Settings for headings
-        ref: brand-typography-options-no-size
+        ref: brand-typography-options-headings
       monospace:
         description: >
           Settings for monospace text
-        ref: brand-typography-options-text # family, size, weight, style
+        ref: brand-typography-options-monospace
       monospace-inline:
         description: Settings for inline code
-        ref: brand-typography-options-inline # family, size, weight, style, color, background-color
+        ref: brand-typography-options-monospace-inline
       monospace-block:
         description: Settings for code blocks
-        ref: brand-typography-options-block # family, size, weight, style, line-height, color, background-color
+        ref: brand-typography-options-monospace-block
       link:
         description: Settings for links
-        ref: brand-typography-options-inline # family, size, weight, style, color, background-color
-        # note for garrick:
-        # we are not going to allow text-decoration only in links
-        # if it exists anywhere, it should be inside brand-typography-options
-        #
-        # presumably, brand books could say that headings need to be underlined, etc.
-        # links are only special in this way in HTML formats and brand is supposed to be format-agnostic
+        ref: brand-typography-options-link
 
-- id: brand-typography-options-text
+- id: brand-typography-options-base
+  description: Typographic options.
+  object:
+    closed: true
+    properties:
+      family: string
+      size: string
+      weight:
+        ref: brand-font-weight
+      color:
+        ref: brand-maybe-named-color
+      line-height:
+        ref: line-height-number-string
+
+- id: brand-typography-options-headings
+  description: Typographic options without a font size.
+  object:
+    closed: true
+    properties:
+      family: string
+      weight:
+        ref: brand-font-weight
+      style:
+        ref: brand-font-style
+      color:
+        ref: brand-maybe-named-color
+      line-height:
+        ref: line-height-number-string
+
+- id: brand-typography-options-monospace
   description: Typographic options for monospace elements.
   object:
     closed: true
@@ -2731,10 +2754,12 @@
       size: string
       weight:
         ref: brand-font-weight
-      style:
-        ref: brand-font-style
+      color:
+        ref: brand-maybe-named-color
+      background-color:
+        ref: brand-maybe-named-color
 
-- id: brand-typography-options-inline
+- id: brand-typography-options-monospace-inline
   description: Typographic options for inline monospace elements.
   object:
     closed: true
@@ -2743,14 +2768,16 @@
       size: string
       weight:
         ref: brand-font-weight
-      style:
-        ref: brand-font-style
       color:
         ref: brand-maybe-named-color
       background-color:
         ref: brand-maybe-named-color
 
-- id: brand-typography-options-block
+- id: line-height-number-string
+  description: Line height
+  anyOf: [number, string]
+
+- id: brand-typography-options-monospace-block
   description: Typographic options for block monospace elements.
   object:
     closed: true
@@ -2759,55 +2786,29 @@
       size: string
       weight:
         ref: brand-font-weight
-      style:
-        ref: brand-font-style
-      line-height: string
       color:
         ref: brand-maybe-named-color
       background-color:
         ref: brand-maybe-named-color
+      line-height:
+        ref: line-height-number-string
 
-- id: brand-typography-options
-  description: Typographic options.
+- id: brand-typography-options-link
+  description: Typographic options for inline monospace elements.
   object:
     closed: true
     properties:
-      family: string
-      size: string
-      line-height: string
       weight:
         ref: brand-font-weight
-      style:
-        ref: brand-font-style
       color:
         ref: brand-maybe-named-color
       background-color:
         ref: brand-maybe-named-color
-      files:
-        maybeArrayOf:
-          anyOf: [path, string]
-        description: >
-          Resolved local paths.
+      decoration: string
 
 - id: brand-named-font
   description: Names of customizeable fonts
   enum: [base, headings, monospace]
-
-- id: brand-typography-options-no-size
-  description: Typographic options without a font size.
-  object:
-    closed: true
-    properties:
-      family: string
-      line-height: string
-      weight:
-        ref: brand-font-weight
-      style:
-        ref: brand-font-style
-      color:
-        ref: brand-maybe-named-color
-      background-color:
-        ref: brand-maybe-named-color
 
 - id: brand-font
   description: Font files and definitions for the brand.

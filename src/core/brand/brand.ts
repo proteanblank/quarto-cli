@@ -13,7 +13,8 @@ import {
   BrandNamedThemeColor,
   BrandStringLightDark,
   BrandTypography,
-  BrandTypographyOptions,
+  BrandTypographyOptionsBase,
+  BrandTypographyOptionsHeadings,
 } from "../../resources/types/schema-types.ts";
 
 // we can't programmatically convert typescript types to string arrays,
@@ -90,17 +91,17 @@ export class Brand {
       typography.monospace = monospace;
     }
     const monospaceInline = this.getFont("monospace-inline");
-    if (monospaceInline) {
+    if (monospace || monospaceInline) {
       typography["monospace-inline"] = {
         ...(monospace ?? {}),
-        ...monospaceInline,
+        ...(monospaceInline ?? {}),
       };
     }
     const monospaceBlock = this.getFont("monospace-block");
-    if (monospaceBlock) {
+    if (monospace || monospaceBlock) {
       typography["monospace-block"] = {
         ...(monospace ?? {}),
-        ...monospaceBlock,
+        ...(monospaceBlock ?? {}),
       };
     }
 
@@ -156,7 +157,9 @@ export class Brand {
     );
   }
 
-  getFont(name: string): BrandTypographyOptions | undefined {
+  getFont(
+    name: string,
+  ): BrandTypographyOptionsBase | BrandTypographyOptionsHeadings | undefined {
     if (!this.data.typography) {
       return undefined;
     }

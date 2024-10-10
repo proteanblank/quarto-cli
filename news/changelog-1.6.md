@@ -9,14 +9,16 @@ All changes included in 1.6:
 - ([#10039](https://github.com/quarto-dev/quarto-cli/issues/10039)): `quarto inspect` properly handles `!expr` tag in metadata.
 - ([#10188](https://github.com/quarto-dev/quarto-cli/issues/10188)): `quarto inspect` properly resolves includes across subdirectory boundaries.
 
-## Lua Filters
+## Lua Filters and extensions
 
+- ([#8179](https://github.com/quarto-dev/quarto-cli/issues/8179)): When merging code cells for complex layouts, do not merge cells with different languages.
 - ([#10004](https://github.com/quarto-dev/quarto-cli/issues/10004)): Resolve callout titles, theorem names, and `code-summary` content through `quarto_ast_pipeline()` and `process_shortcodes()`.
 - ([#10196](https://github.com/quarto-dev/quarto-cli/issues/10196)): Protect against nil values in `float.caption_long`.
 - ([#10328](https://github.com/quarto-dev/quarto-cli/issues/10328)): Interpret subcells as subfloats when subcap count matches subcell count.
 - ([#10624](https://github.com/quarto-dev/quarto-cli/issues/10624)): Don't crash when proof environments are empty in `pdf`.
 - ([#10858](https://github.com/quarto-dev/quarto-cli/issues/10858)): Don't crash in `gfm` when `content` of a `FloatRefTarget` is of type `Blocks`.
 - ([#10894](https://github.com/quarto-dev/quarto-cli/issues/10894)): Fix configuration of title and prefix in callouts for `html`, `revealjs`, `pdf`, and `typst`.
+- ([#10999](https://github.com/quarto-dev/quarto-cli/issues/10999)): New API entry point: `quarto.paths.rscript()` to resolve `Rscript` path in Lua filters and extensions consistently with Quarto itself.
 
 ## `dashboard` Format
 
@@ -31,6 +33,7 @@ All changes included in 1.6:
 ## `revealjs` Format
 
 - Update to Reveal JS 5.1.0.
+  - Support for a [Jump To Slide](https://revealjs.com/jump-to-slide/) menu to quickly navigate between slides. Set `jump-to-slide: false` to opt out.
 - Prevent empty SASS built css file to be included in header.
 - Remove wrong `sourceMappingUrl` entry in SASS built css.
 - ([#7715](https://github.com/quarto-dev/quarto-cli/issues/7715)): Revealjs don't support anymore special Pandoc syntax making BulletList in Blockquotes become incremental list. This was confusing and unexpected behavior. Supported syntax for incremental list is documented at <https://quarto.org/docs/presentations/revealjs/#incremental-lists>.
@@ -44,7 +47,8 @@ All changes included in 1.6:
 - ([#10168](https://github.com/quarto-dev/quarto-cli/issues/10168)): Support `csl` bibliography style.
 - ([#10181](https://github.com/quarto-dev/quarto-cli/issues/10181)): Remove workaround for image dimensions which is no longer necessary and mishandled image paths with spaces.
 - ([#10217](https://github.com/quarto-dev/quarto-cli/issues/10217)): Explicitly compute units for image dimensions in `typst` format when they're not given.
-- ([#10212](https://github.com/quarto-dev/quarto-cli/issues/10212)): Moves Pandoc variables to the function declaration for the default template.
+- ([#10212](https://github.com/quarto-dev/quarto-cli/issues/10212)): Move Pandoc variables to the function declaration for the default template.
+- ([#10438](https://github.com/quarto-dev/quarto-cli/issues/10438)): Ensure Pandoc doesn't emit its own crossref environments for table elements.
 
 ## `latex` and `pdf` Format
 

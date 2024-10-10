@@ -12104,33 +12104,75 @@ var require_yaml_intelligence_resources = __commonJS({
               },
               base: {
                 description: "The base font settings for the brand. These are used as the default for all text.\n",
-                ref: "brand-typography-options"
+                ref: "brand-typography-options-base"
               },
               headings: {
                 description: "Settings for headings\n",
-                ref: "brand-typography-options-no-size"
+                ref: "brand-typography-options-headings"
               },
               monospace: {
                 description: "Settings for monospace text\n",
-                ref: "brand-typography-options-text"
+                ref: "brand-typography-options-monospace"
               },
               "monospace-inline": {
                 description: "Settings for inline code",
-                ref: "brand-typography-options-inline"
+                ref: "brand-typography-options-monospace-inline"
               },
               "monospace-block": {
                 description: "Settings for code blocks",
-                ref: "brand-typography-options-block"
+                ref: "brand-typography-options-monospace-block"
               },
               link: {
                 description: "Settings for links",
-                ref: "brand-typography-options-inline"
+                ref: "brand-typography-options-link"
               }
             }
           }
         },
         {
-          id: "brand-typography-options-text",
+          id: "brand-typography-options-base",
+          description: "Typographic options.",
+          object: {
+            closed: true,
+            properties: {
+              family: "string",
+              size: "string",
+              weight: {
+                ref: "brand-font-weight"
+              },
+              color: {
+                ref: "brand-maybe-named-color"
+              },
+              "line-height": {
+                ref: "line-height-number-string"
+              }
+            }
+          }
+        },
+        {
+          id: "brand-typography-options-headings",
+          description: "Typographic options without a font size.",
+          object: {
+            closed: true,
+            properties: {
+              family: "string",
+              weight: {
+                ref: "brand-font-weight"
+              },
+              style: {
+                ref: "brand-font-style"
+              },
+              color: {
+                ref: "brand-maybe-named-color"
+              },
+              "line-height": {
+                ref: "line-height-number-string"
+              }
+            }
+          }
+        },
+        {
+          id: "brand-typography-options-monospace",
           description: "Typographic options for monospace elements.",
           object: {
             closed: true,
@@ -12140,14 +12182,17 @@ var require_yaml_intelligence_resources = __commonJS({
               weight: {
                 ref: "brand-font-weight"
               },
-              style: {
-                ref: "brand-font-style"
+              color: {
+                ref: "brand-maybe-named-color"
+              },
+              "background-color": {
+                ref: "brand-maybe-named-color"
               }
             }
           }
         },
         {
-          id: "brand-typography-options-inline",
+          id: "brand-typography-options-monospace-inline",
           description: "Typographic options for inline monospace elements.",
           object: {
             closed: true,
@@ -12157,9 +12202,6 @@ var require_yaml_intelligence_resources = __commonJS({
               weight: {
                 ref: "brand-font-weight"
               },
-              style: {
-                ref: "brand-font-style"
-              },
               color: {
                 ref: "brand-maybe-named-color"
               },
@@ -12170,7 +12212,15 @@ var require_yaml_intelligence_resources = __commonJS({
           }
         },
         {
-          id: "brand-typography-options-block",
+          id: "line-height-number-string",
+          description: "Line height",
+          anyOf: [
+            "number",
+            "string"
+          ]
+        },
+        {
+          id: "brand-typography-options-monospace-block",
           description: "Typographic options for block monospace elements.",
           object: {
             closed: true,
@@ -12180,33 +12230,26 @@ var require_yaml_intelligence_resources = __commonJS({
               weight: {
                 ref: "brand-font-weight"
               },
-              style: {
-                ref: "brand-font-style"
-              },
-              "line-height": "string",
               color: {
                 ref: "brand-maybe-named-color"
               },
               "background-color": {
                 ref: "brand-maybe-named-color"
+              },
+              "line-height": {
+                ref: "line-height-number-string"
               }
             }
           }
         },
         {
-          id: "brand-typography-options",
-          description: "Typographic options.",
+          id: "brand-typography-options-link",
+          description: "Typographic options for inline monospace elements.",
           object: {
             closed: true,
             properties: {
-              family: "string",
-              size: "string",
-              "line-height": "string",
               weight: {
                 ref: "brand-font-weight"
-              },
-              style: {
-                ref: "brand-font-style"
               },
               color: {
                 ref: "brand-maybe-named-color"
@@ -12214,15 +12257,7 @@ var require_yaml_intelligence_resources = __commonJS({
               "background-color": {
                 ref: "brand-maybe-named-color"
               },
-              files: {
-                maybeArrayOf: {
-                  anyOf: [
-                    "path",
-                    "string"
-                  ]
-                },
-                description: "Resolved local paths.\n"
-              }
+              decoration: "string"
             }
           }
         },
@@ -12234,29 +12269,6 @@ var require_yaml_intelligence_resources = __commonJS({
             "headings",
             "monospace"
           ]
-        },
-        {
-          id: "brand-typography-options-no-size",
-          description: "Typographic options without a font size.",
-          object: {
-            closed: true,
-            properties: {
-              family: "string",
-              "line-height": "string",
-              weight: {
-                ref: "brand-font-weight"
-              },
-              style: {
-                ref: "brand-font-style"
-              },
-              color: {
-                ref: "brand-maybe-named-color"
-              },
-              "background-color": {
-                ref: "brand-maybe-named-color"
-              }
-            }
-          }
         },
         {
           id: "brand-font",
@@ -18306,6 +18318,17 @@ var require_yaml_intelligence_resources = __commonJS({
           schema: "boolean",
           default: false,
           description: "Play a subtle sound when changing slides"
+        },
+        {
+          name: "jump-to-slide",
+          tags: {
+            formats: [
+              "revealjs"
+            ]
+          },
+          schema: "boolean",
+          default: true,
+          description: "Deactivate jump to slide feature."
         }
       ],
       "schema/document-reveal-print.yml": [
@@ -21676,13 +21699,14 @@ var require_yaml_intelligence_resources = __commonJS({
         "Settings for inline code",
         "Settings for code blocks",
         "Settings for links",
+        "Typographic options.",
+        "Typographic options without a font size.",
         "Typographic options for monospace elements.",
         "Typographic options for inline monospace elements.",
+        "Line height",
         "Typographic options for block monospace elements.",
-        "Typographic options.",
-        "Resolved local paths.",
+        "Typographic options for inline monospace elements.",
         "Names of customizeable fonts",
-        "Typographic options without a font size.",
         "Font files and definitions for the brand.",
         "A font weight.",
         "A font style.",
@@ -22920,6 +22944,7 @@ var require_yaml_intelligence_resources = __commonJS({
         "Monitor the hash and change slides accordingly",
         "Include the current fragment in the URL",
         "Play a subtle sound when changing slides",
+        "Deactivate jump to slide feature.",
         {
           short: "Slides that are too tall to fit within a single page will expand onto\nmultiple pages",
           long: "Slides that are too tall to fit within a single page will expand onto\nmultiple pages. You can limit how many pages a slide may expand to using\nthis option."
@@ -23986,12 +24011,12 @@ var require_yaml_intelligence_resources = __commonJS({
         mermaid: "%%"
       },
       "handlers/mermaid/schema.yml": {
-        _internalId: 190200,
+        _internalId: 190350,
         type: "object",
         description: "be an object",
         properties: {
           "mermaid-format": {
-            _internalId: 190192,
+            _internalId: 190342,
             type: "enum",
             enum: [
               "png",
@@ -24007,7 +24032,7 @@ var require_yaml_intelligence_resources = __commonJS({
             exhaustiveCompletions: true
           },
           theme: {
-            _internalId: 190199,
+            _internalId: 190349,
             type: "anyOf",
             anyOf: [
               {
@@ -33910,6 +33935,11 @@ async function locateCellWithCursor(context) {
   return foundCell;
 }
 
+// ../yaml-schema/brand.ts
+var getBrandConfigSchema = async () => {
+  return refSchema("brand", "");
+};
+
 // yaml-intelligence.ts
 function getTagValue(schema2, tag) {
   if (schema2 === true || schema2 === false) {
@@ -34638,7 +34668,19 @@ var determineSchema = async (context) => {
       schema: extensionConfigSchema,
       schemaName: "extension-config"
     };
-  } else {
+  }
+  const brandYamlNames = [
+    "_brand.yml",
+    "_brand.yaml"
+  ];
+  if (context.path && brandYamlNames.some((name) => context.path.endsWith(name))) {
+    const brandYamlSchema = await getBrandConfigSchema();
+    return {
+      schema: brandYamlSchema,
+      schemaName: "brand"
+    };
+  }
+  {
     const projectConfigSchema = await getProjectConfigSchema();
     return {
       schema: projectConfigSchema,
