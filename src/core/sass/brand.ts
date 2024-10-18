@@ -180,12 +180,28 @@ const brandColorBundle = (
   key: string,
   nameMap: Record<string, string>,
 ): SassBundleLayers => {
-  const colorVariables: string[] = ["/* color variables from _brand.yml */"];
+  const colorVariables: string[] = [
+    "/* color variables from _brand.yml */",
+    '// quarto-scss-analysis-annotation { "action": "push", "origin": "_brand.yml color" }',
+  ];
+  const colorCssVariables: string[] = [
+    "/* color CSS variables from _brand.yml */",
+    '// quarto-scss-analysis-annotation { "action": "push", "origin": "_brand.yml color" }',
+    ":root {",
+  ];
+
+  // Create `brand-` prefixed Sass and CSS variables from color.palette
   for (const colorKey of Object.keys(brand.data?.color?.palette ?? {})) {
+    const colorVar = colorKey.replace(/[^a-zA-Z0-9_-]+/, "-");
     colorVariables.push(
-      `$${colorKey}: ${brand.getColor(colorKey)} !default;`,
+      `$brand-${colorVar}: ${brand.getColor(colorKey)} !default;`,
     );
+    colorCssVariables.push(
+      `  --brand-${colorVar}: ${brand.getColor(colorKey)};`,
+    )
   }
+
+  // Map theme colors directly to Sass variables
   for (const colorKey of Object.keys(brand.data.color ?? {})) {
     if (colorKey === "palette") {
       continue;
@@ -194,6 +210,7 @@ const brandColorBundle = (
       `$${colorKey}: ${brand.getColor(colorKey)} !default;`,
     );
   }
+
   // format-specific name mapping
   for (const [key, value] of Object.entries(nameMap)) {
     const resolvedValue = brand.getColor(value);
@@ -204,6 +221,8 @@ const brandColorBundle = (
     }
   }
   // const colorEntries = Object.keys(brand.color);
+  colorVariables.push('// quarto-scss-analysis-annotation { "action": "pop" }');
+  colorCssVariables.push("}", '// quarto-scss-analysis-annotation { "action": "pop" }');
   const colorBundle: SassBundleLayers = {
     key,
     // dependency: "bootstrap",
@@ -212,10 +231,89 @@ const brandColorBundle = (
       uses: "",
       functions: "",
       mixins: "",
-      rules: "",
+      rules: colorCssVariables.join("\n"),
     },
   };
   return colorBundle;
+};
+
+const brandBootstrapBundle = (
+  brand: Brand,
+  key: string
+): SassBundleLayers => {
+  // Bootstrap Variables from brand.defaults.bootstrap
+  const brandBootstrap = (brand?.data?.defaults?.bootstrap as unknown as Record<
+    string,
+    Record<string, string | boolean | number | null>
+  >);
+
+  const bsVariables: string[] = [
+    "/* Bootstrap variables from _brand.yml */",
+    '// quarto-scss-analysis-annotation { "action": "push", "origin": "_brand.yml defaults.bootstrap" }',
+  ];
+  for (const bsVar of Object.keys(brandBootstrap)) {
+    if (bsVar === "version") {
+      continue;
+    }
+    bsVariables.push(
+      `$${bsVar}: ${brandBootstrap[bsVar]} !default;`,
+    );
+  }
+  bsVariables.push('// quarto-scss-analysis-annotation { "action": "pop" }');
+
+  // Bootstrap Colors from color.palette
+  let bootstrapColorVariables: string[] = [];
+  if (Number(brandBootstrap?.version ?? 5) === 5) {
+    // https://getbootstrap.com/docs/5.3/customize/color/#color-sass-maps
+    bootstrapColorVariables = [
+      "blue",
+      "indigo",
+      "purple",
+      "pink",
+      "red",
+      "orange",
+      "yellow",
+      "green",
+      "teal",
+      "cyan",
+      "black",
+      "white",
+      "gray",
+      "gray-dark"
+    ]
+  }
+
+  const bsColors: string[] = [
+    "/* Bootstrap color variables from _brand.yml */",
+    '// quarto-scss-analysis-annotation { "action": "push", "origin": "_brand.yml color.palette" }',
+  ];
+
+  if (bootstrapColorVariables.length > 0) {
+    for (const colorKey of Object.keys(brand.data?.color?.palette ?? {})) {
+      if (!bootstrapColorVariables.includes(colorKey)) {
+        continue;
+      }
+
+      bsColors.push(
+        `$${colorKey}: ${brand.getColor(colorKey)} !default;`,
+      );
+    }
+  }
+
+  bsColors.push('// quarto-scss-analysis-annotation { "action": "pop" }');
+
+  const bsBundle: SassBundleLayers = {
+    key,
+    // dependency: "bootstrap",
+    quarto: {
+      defaults: bsColors.join("\n") + "\n" + bsVariables.join("\n"),
+      uses: "",
+      functions: "",
+      mixins: "",
+      rules: "",
+    },
+  };
+  return bsBundle;
 };
 
 const brandTypographyBundle = (
@@ -224,8 +322,9 @@ const brandTypographyBundle = (
 ): SassBundleLayers => {
   const typographyVariables: string[] = [
     "/* typography variables from _brand.yml */",
+    '// quarto-scss-analysis-annotation { "action": "push", "origin": "_brand.yml typography" }',
   ];
-  const typographyImports: string[] = [];
+  const typographyImports: Set<string> = new Set();
   const fonts = brand.data?.typography?.fonts ?? [];
 
   const pathCorrection = relative(brand.projectDir, brand.brandDir);
@@ -263,10 +362,10 @@ const brandTypographyBundle = (
         googleFamily = thisFamily;
       } else if (googleFamily !== thisFamily) {
         throw new Error(
-          `Inconsisent Google font families found: ${googleFamily} and ${thisFamily}`,
+          `Inconsistent Google font families found: ${googleFamily} and ${thisFamily}`,
         );
       }
-      typographyVariables.push(googleFontImportString(resolvedFont));
+      typographyImports.add(googleFontImportString(resolvedFont));
     }
     if (googleFamily === "") {
       return undefined;
@@ -323,12 +422,14 @@ const brandTypographyBundle = (
       ["family", "font-family-base"],
       ["size", "font-size-base"],
       ["line-height", "line-height-base"],
+      ["weight", "font-weight-base"],
 
       // revealjs
       ["family", "mainFont"],
       ["size", "presentation-font-size-root"],
       ["line-height", "presentation-line-height"],
       // TBD?
+
       // ["style", "font-style-base"],
       // ["weight", "font-weight-base"],
     ],
@@ -353,8 +454,16 @@ const brandTypographyBundle = (
       ["family", "font-family-monospace"],
       // bootstrap
       ["size", "code-font-size"],
+      // forward explicitly to both `code` and `pre`
+      // because that interacts less with the default bootstrap styles
+      ["color", "code-color"], // this is also revealjs
+      ["color", "pre-color"],
+
+      ["weight", "font-weight-monospace"],
+
       // revealjs
       ["size", "code-block-font-size"],
+      ["color", "code-block-color"],
     ],
     "monospace-block": [
       // bootstrap + revealjs
@@ -363,6 +472,8 @@ const brandTypographyBundle = (
       ["line-height", "pre-line-height"],
       ["color", "pre-color"],
       ["background-color", "pre-bg"],
+      ["size", "code-block-font-size"],
+      ["weight", "font-weight-monospace-block"],
       // revealjs
       ["line-height", "code-block-line-height"],
       ["color", "code-block-color"],
@@ -375,18 +486,20 @@ const brandTypographyBundle = (
       ["background-color", "code-bg"],
       // bootstrap
       ["size", "code-inline-font-size"],
+      ["weight", "font-weight-monospace-inline"],
       // revealjs
-      ["size", "code-block-font-size"],
+      // ["size", "code-block-font-size"],
     ],
   };
 
   for (
     const kind of [
-      "base",
-      "headings",
-      "monospace",
+      // more specific entries go first
       "monospace-block",
       "monospace-inline",
+      "monospace",
+      "headings",
+      "base",
     ]
   ) {
     const fontInformation = resolveHTMLFontInformation(
@@ -403,19 +516,26 @@ const brandTypographyBundle = (
       const source = variable[0];
       const target = variable[1];
       if (fontInformation[source]) {
+        let value = fontInformation[source];
+        if (["color", "background-color"].includes(source)) {
+          value = brand.getColor(value as string);
+        }
         typographyVariables.push(
-          `$${target}: ${fontInformation[source]} !default;`,
+          `$${target}: ${value} !default;`,
         );
       }
     }
   }
 
+  typographyVariables.push(
+    '// quarto-scss-analysis-annotation { "action": "pop" }',
+  );
   const typographyBundle: SassBundleLayers = {
     key,
     // dependency: "bootstrap",
     quarto: {
       defaults: typographyVariables.join("\n"),
-      uses: typographyImports.join("\n"),
+      uses: Array.from(typographyImports).join("\n"),
       functions: "",
       mixins: "",
       rules: "",
@@ -424,7 +544,7 @@ const brandTypographyBundle = (
   return typographyBundle;
 };
 
-export async function brandBootstrapSassBundleLayers(
+export async function brandSassBundleLayers(
   fileName: string | undefined,
   project: ProjectContext,
   key: string,
@@ -444,12 +564,33 @@ export async function brandBootstrapSassBundleLayers(
   return sassBundles;
 }
 
+export async function brandBootstrapSassBundleLayers(
+  fileName: string | undefined,
+  project: ProjectContext,
+  key: string,
+  nameMap: Record<string, string> = {},
+): Promise<SassBundleLayers[]> {
+  const brand = await project.resolveBrand(fileName);
+  const sassBundles = await brandSassBundleLayers(fileName, project, key, nameMap);
+
+  if (brand?.data?.defaults?.bootstrap) {
+    const bsBundle = brandBootstrapBundle(brand, key);
+    if (bsBundle) {
+      // Add bsBundle to the beginning of the array so that defaults appear
+      // *after* the rest of the brand variables.
+      sassBundles.unshift(bsBundle);
+    }
+  }
+
+  return sassBundles;
+}
+
 export async function brandRevealSassBundleLayers(
   input: string | undefined,
   _format: Format,
   project: ProjectContext,
 ): Promise<SassBundleLayers[]> {
-  return brandBootstrapSassBundleLayers(
+  return brandSassBundleLayers(
     input,
     project,
     "reveal-theme",
