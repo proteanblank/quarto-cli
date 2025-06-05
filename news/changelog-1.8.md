@@ -19,6 +19,7 @@ All changes included in 1.8:
 - ([#12734](https://github.com/quarto-dev/quarto-cli/issues/12734)): `highlight-style` now correctly supports setting a different `light` and `dark`.
 - ([#12747](https://github.com/quarto-dev/quarto-cli/issues/12747)): Ensure `th` elements are properly restored when Quarto's HTML table processing is happening.
 - ([#12766](https://github.com/quarto-dev/quarto-cli/issues/12766)): Use consistent equation numbering display for `html-math-method` and `html-math-method.method` for MathJax and KaTeX (author: @mcanouil)
+- ([#12797](https://github.com/quarto-dev/quarto-cli/issues/12797)): Allow light and dark brands to be specified in one file, by specializing colors with `light:` and `dark:`.
 
 ### `revealjs`
 
@@ -69,6 +70,10 @@ All changes included in 1.8:
 
 - ([#12753](https://github.com/quarto-dev/quarto-cli/issues/12753)): Support change in IPython 9+ and import `set_matplotlib_formats` from `matplotlib_inline.backend_inline` in the internal `setup.py` script used to initialize rendering with Jupyter engine.
 - ([#12839](https://github.com/quarto-dev/quarto-cli/issues/12839)): Support for `plotly.py` 6+ which now loads plotly.js using a cdn in script as a module.
+
+### `knitr`
+
+- Correctly detect R binary on Windows when `R_HOME` is set - this fixes issue with `quarto::quarto_render()` that will now correctly use the same R version as the R session it is called from.
 
 ## Other fixes and improvements
 
